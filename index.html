@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>GymTrack</title>
+  <meta name="description" content="Seguimiento de entrenamientos de hipertrofia: rutinas, series, descansos y progreso de peso.">
+  <meta name="theme-color" content="#f9f9ff" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#111318" media="(prefers-color-scheme: dark)">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..24,400,0..1,0&display=block">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="top-app-bar" id="appbar">
+    <span class="msr brand-icon">fitness_center</span>
+    <h1 class="title-l" id="title">Hoy</h1>
+  </header>
+
+  <main id="view" aria-live="polite"></main>
+
+  <div class="rest-timer" id="timer" hidden role="timer" aria-label="Temporizador de descanso">
+    <div class="rt-info">
+      <span class="label-m">DESCANSO</span>
+      <span class="rt-time" id="timer-time">0:00</span>
+    </div>
+    <div class="rt-actions">
+      <button class="btn text inv" data-action="timer-sub" aria-label="Quitar 15 segundos">−15</button>
+      <button class="btn text inv" data-action="timer-add" aria-label="Agregar 15 segundos">+15</button>
+      <button class="btn tonal inv-tonal" data-action="timer-skip"><span class="msr">skip_next</span>Saltar</button>
+    </div>
+    <div class="rt-bar"><div id="timer-bar"></div></div>
+  </div>
+
+  <nav class="nav-bar" aria-label="Navegación principal">
+    <a href="#hoy" class="nav-item" data-view="hoy"><span class="nav-ind"><span class="msr">today</span></span><span class="label-m">Hoy</span></a>
+    <a href="#rutinas" class="nav-item" data-view="rutinas"><span class="nav-ind"><span class="msr">list_alt</span></span><span class="label-m">Rutinas</span></a>
+    <a href="#historial" class="nav-item" data-view="historial"><span class="nav-ind"><span class="msr">history</span></span><span class="label-m">Historial</span></a>
+    <a href="#progreso" class="nav-item" data-view="progreso"><span class="nav-ind"><span class="msr">monitoring</span></span><span class="label-m">Progreso</span></a>
+    <a href="#perfil" class="nav-item" data-view="perfil"><span class="nav-ind"><span class="msr">person</span></span><span class="label-m">Perfil</span></a>
+  </nav>
+
+  <div class="snackbar" id="snackbar" role="status"></div>
+  <dialog id="modal"></dialog>
+  <dialog id="editor" class="dialog-fs"></dialog>
+  <input type="file" id="import-file" accept="application/json,.json" hidden>
+
+  <script src="app.js"></script>
+</body>
+</html>
