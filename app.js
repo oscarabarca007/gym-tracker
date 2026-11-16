@@ -14,6 +14,60 @@ const ACTIVITY = [
   { v: 1.725, l: 'Alta (5-6 días o trabajo activo)' },
 ];
 
+/* Imágenes de referencia: free-exercise-db (dominio público, Unlicense).
+   Las de la rutina por defecto van incluidas en /img; el resto se cargan del repositorio original. */
+const IMG_REMOTE = 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/';
+const IMG_BY_NAME = {
+  'Press de banca con barra': 'Barbell_Bench_Press_-_Medium_Grip',
+  'Press inclinado con mancuernas': 'Incline_Dumbbell_Press',
+  'Press en máquina convergente': 'Leverage_Chest_Press',
+  'Cruce de poleas (alto a bajo)': 'Cable_Crossover',
+  'Fondos en paralelas (lastrados)': 'Dips_-_Chest_Version',
+  'Press francés con barra EZ': 'EZ-Bar_Skullcrusher',
+  'Extensión de tríceps en polea con cuerda': 'Triceps_Pushdown_-_Rope_Attachment',
+  'Extensión sobre la cabeza en polea': 'Cable_Rope_Overhead_Triceps_Extension',
+  'Sentadilla trasera con barra': 'Barbell_Full_Squat',
+  'Prensa de pierna': 'Leg_Press',
+  'Sentadilla búlgara': 'Split_Squat_with_Dumbbells',
+  'Extensión de cuádriceps': 'Leg_Extensions',
+  'Curl femoral sentado': 'Seated_Leg_Curl',
+  'Elevación de talones de pie': 'Standing_Calf_Raises',
+  'Crunch en polea': 'Cable_Crunch',
+  'Dominadas lastradas': 'Weighted_Pull_Ups',
+  'Remo con barra': 'Bent_Over_Barbell_Row',
+  'Jalón al pecho agarre neutro': 'V-Bar_Pulldown',
+  'Remo en máquina con pecho apoyado': 'Lying_T-Bar_Row',
+  'Pullover en polea': 'Straight-Arm_Pulldown',
+  'Face pull': 'Face_Pull',
+  'Curl con barra': 'Barbell_Curl',
+  'Curl inclinado con mancuernas': 'Incline_Dumbbell_Curl',
+  'Curl martillo': 'Hammer_Curls',
+  'Peso muerto rumano': 'Romanian_Deadlift',
+  'Hip thrust con barra': 'Barbell_Hip_Thrust',
+  'Sentadilla hack': 'Hack_Squat',
+  'Curl femoral acostado': 'Lying_Leg_Curls',
+  'Zancadas caminando': 'Barbell_Walking_Lunge',
+  'Aducción en máquina': 'Thigh_Adductor',
+  'Elevación de talones sentado': 'Seated_Calf_Raise',
+};
+const BUNDLED = new Set(Object.values(IMG_BY_NAME));
+const imgUrl = (id, n = 0) => (BUNDLED.has(id) ? `img/${id}/${n}.jpg` : `${IMG_REMOTE}${encodeURIComponent(id)}/${n}.jpg`);
+const MUSCLE_ES = {
+  abdominals: 'abdomen', hamstrings: 'femoral', adductors: 'aductores', quadriceps: 'cuádriceps', biceps: 'bíceps',
+  shoulders: 'hombro', chest: 'pecho', 'middle back': 'espalda media', calves: 'pantorrilla', glutes: 'glúteo',
+  'lower back': 'espalda baja', lats: 'dorsal', triceps: 'tríceps', traps: 'trapecio', forearms: 'antebrazo', neck: 'cuello', abductors: 'abductores',
+};
+const QUERY_ES = {
+  banca: 'bench', mancuerna: 'dumbbell', mancuernas: 'dumbbell', barra: 'barbell', polea: 'cable', poleas: 'cable',
+  sentadilla: 'squat', remo: 'row', prensa: 'press', zancada: 'lunge', zancadas: 'lunge', dominada: 'pull', dominadas: 'pull',
+  fondos: 'dips', jalon: 'pulldown', lateral: 'lateral', laterales: 'lateral', elevacion: 'raise', elevaciones: 'raise', militar: 'military',
+  hombro: 'shoulder', pantorrilla: 'calf', talones: 'calf', muerto: 'deadlift', inclinado: 'incline', declinado: 'decline',
+  maquina: 'machine', aperturas: 'fly', apertura: 'fly', cruce: 'crossover', encogimiento: 'shrug', encogimientos: 'shrug',
+  plancha: 'plank', martillo: 'hammer', frances: 'skullcrusher', extension: 'extension', cuerda: 'rope', pecho: 'chest',
+  espalda: 'back', pierna: 'leg', femoral: 'leg curl', gluteo: 'glute', biceps: 'biceps', triceps: 'triceps', abdominal: 'crunch',
+  abdomen: 'abdominals', cuadriceps: 'quadriceps', trasera: 'rear', frontal: 'front', sentado: 'seated', acostado: 'lying', pie: 'standing',
+};
+
 /* ---------- Utilidades ---------- */
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
@@ -38,7 +92,7 @@ const e1rm = (w, r) => (w > 0 && r > 0 ? w * (1 + r / 30) : 0); // Epley
 const restLabel = s => (s >= 60 ? (s % 60 ? fmtTime(s) : `${s / 60} min`) : `${s} s`);
 
 /* ---------- Rutina por defecto (hipertrofia, nivel avanzado) ---------- */
-function E(name, sets, reps, rest, notes = '') { return { id: uid(), name, sets, reps, rest, notes }; }
+function E(name, sets, reps, rest, notes = '') { return { id: uid(), name, sets, reps, rest, notes, img: IMG_BY_NAME[name] || '' }; }
 function defaultRoutines() {
   return [
     { id: uid(), name: 'Pecho y Tríceps', day: 1, exercises: [
@@ -86,8 +140,8 @@ function defaultRoutines() {
 /* ---------- Estado ---------- */
 function freshState() {
   return {
-    v: 1,
-    profile: { startLb: 200, heightCm: 179, goalLb: 190, age: 30, sex: 'M', activity: 1.55, theme: 'system' },
+    v: 2,
+    profile: { startLb: 200, heightCm: 179, goalLb: 190, age: 26, sex: 'M', activity: 1.55, theme: 'system' },
     routines: defaultRoutines(),
     sessions: [],
     weights: [{ date: isoDate(), lb: 200 }],
@@ -97,12 +151,22 @@ function freshState() {
 function load() {
   try {
     const d = JSON.parse(localStorage.getItem(KEY));
-    if (d && Array.isArray(d.routines)) {
-      const f = freshState();
-      return { ...f, ...d, profile: { ...f.profile, ...d.profile } };
-    }
+    if (d && Array.isArray(d.routines)) return migrate(d);
   } catch (_) { /* sin datos */ }
   return freshState();
+}
+function migrate(d) {
+  const f = freshState();
+  const s = { ...f, ...d, profile: { ...f.profile, ...d.profile } };
+  if (!d.v || d.v < 2) {
+    // v2: imágenes de referencia y edad real (26) en lugar del valor estimado anterior (30).
+    if (s.profile.age === 30) s.profile.age = 26;
+    const addImg = e => { if (e.img === undefined) e.img = IMG_BY_NAME[e.name] || ''; };
+    s.routines.forEach(r => r.exercises.forEach(addImg));
+    if (s.active) s.active.exercises.forEach(addImg);
+  }
+  s.v = 2;
+  return s;
 }
 let S = load();
 function save() {
@@ -247,7 +311,7 @@ function viewHoy() {
   const preview = sel ? `<h3 class="title-m section-title">Ejercicios</h3>
     <section class="card outlined"><ul class="list">${sel.exercises.map((e, i) => {
       const sg = suggestion(e);
-      return `<li class="list-item"><span class="lead">${i + 1}</span><div class="grow">
+      return `<li class="list-item">${e.img ? thumbBtn(e, 'lead-thumb', i + 1) : `<span class="lead">${i + 1}</span>`}<div class="grow">
         <div class="body-l">${esc(e.name)}</div>
         <div class="body-m muted">${e.sets} × ${esc(e.reps)} · descanso ${restLabel(e.rest)}</div>
         ${sg ? `<div style="margin-top:6px"><span class="chip sug ${sg.type}"><span class="msr">${sg.type === 'up' ? 'trending_up' : sg.type === 'hold' ? 'pause' : 'add'}</span>${esc(sg.text)}</span></div>` : ''}
@@ -288,13 +352,80 @@ function setDefaults(e, j) {
   return { w: prev ? prev.w : '', r: prev ? prev.r : hi };
 }
 
+/* ---------- Imágenes de referencia ---------- */
+function thumbBtn(e, cls, badge = '') {
+  return `<button class="thumb-btn ${cls}" data-action="show-img" data-img="${esc(e.img)}" data-name="${esc(e.name)}" aria-label="Ver imagen de ${esc(e.name)}">
+    <img src="${imgUrl(e.img)}" alt="" loading="lazy">${badge !== '' ? `<span class="thumb-badge">${badge}</span>` : ''}</button>`;
+}
+let viewerT = null;
+function showImage(id, name) {
+  const yt = 'https://www.youtube.com/results?search_query=' + encodeURIComponent(name + ' técnica');
+  modal({
+    title: esc(name),
+    body: `<div class="viewer"><img id="viewer-img" src="${imgUrl(id, 0)}" alt="${esc(name)}"><span class="viewer-tag" id="viewer-tag">Inicio</span></div>
+      <div class="viewer-frames">
+        <figure><img src="${imgUrl(id, 0)}" alt=""><figcaption class="label-m muted">INICIO</figcaption></figure>
+        <figure><img src="${imgUrl(id, 1)}" alt=""><figcaption class="label-m muted">FINAL</figcaption></figure>
+      </div>
+      <a class="btn text" href="${yt}" target="_blank" rel="noopener" style="margin-top:8px"><span class="msr">play_circle</span>Ver video de técnica</a>`,
+    ok: 'Cerrar',
+  }).then(() => { clearInterval(viewerT); viewerT = null; });
+  let n = 0;
+  clearInterval(viewerT);
+  viewerT = setInterval(() => {
+    const im = $('#viewer-img'); if (!im) return;
+    n = 1 - n; im.src = imgUrl(id, n); $('#viewer-tag').textContent = n ? 'Final' : 'Inicio';
+  }, 1200);
+}
+
+let exIndex = null;
+let pickFor = null;
+const norm = s => String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+async function openPicker(i) {
+  pickFor = i;
+  const d = $('#picker');
+  const q = draft.exercises[i].name;
+  d.innerHTML = `<div class="fs">
+    <header class="top-app-bar">
+      <button class="icon-btn" data-action="pick-close" aria-label="Cerrar"><span class="msr">arrow_back</span></button>
+      <div class="search grow"><span class="msr">search</span><input id="pick-q" type="search" placeholder="Buscar ejercicio (ej. curl, banca, squat)" value="${esc(q)}" autocomplete="off"></div>
+    </header>
+    <div class="dialog-body"><div class="dialog-body-inner" id="pick-results"><p class="body-m muted" style="padding:16px">Cargando ejercicios…</p></div></div>
+  </div>`;
+  d.showModal();
+  if (!exIndex) {
+    try { exIndex = await (await fetch('exercises-index.json')).json(); }
+    catch (_) { $('#pick-results').innerHTML = '<p class="body-m muted" style="padding:16px">No se pudo cargar la lista. Revisa tu conexión.</p>'; return; }
+  }
+  renderPicker();
+}
+function renderPicker() {
+  const box = $('#pick-results'); if (!box || !exIndex) return;
+  const words = norm($('#pick-q').value).split(/[^a-z0-9]+/).filter(w => w.length > 1 && !['de', 'con', 'en', 'el', 'la', 'al', 'y', 'a'].includes(w));
+  const terms = words.map(w => QUERY_ES[w] || w);
+  let res;
+  if (!terms.length) res = exIndex.slice(0, 40).map(x => ({ x, s: 0 }));
+  else {
+    res = exIndex.map(x => {
+      const hay = norm(x[1] + ' ' + x[2] + ' ' + (MUSCLE_ES[x[2]] || ''));
+      const s = terms.reduce((t, w) => t + (hay.includes(w.split(' ')[0]) ? 1 : 0), 0);
+      return { x, s };
+    }).filter(r => r.s > 0).sort((a, b) => b.s - a.s || a.x[1].length - b.x[1].length).slice(0, 40);
+  }
+  box.innerHTML = res.length ? `<p class="body-s muted" style="margin:8px 4px">Base de datos en inglés; puedes escribir en español (banca, polea, sentadilla…).</p><ul class="list">${res.map(({ x }) => `
+    <li><button class="pick-row" data-action="pick-img" data-id="${esc(x[0])}">
+      <img src="${imgUrl(x[0])}" alt="" loading="lazy">
+      <span class="grow"><span class="body-l" style="display:block">${esc(x[1])}</span><span class="body-s muted">${esc(MUSCLE_ES[x[2]] || x[2])}</span></span>
+    </button></li>`).join('')}</ul>` : '<p class="body-m muted" style="padding:16px">Sin resultados. Prueba con otra palabra.</p>';
+}
+
 function exCard(e, i) {
   const lp = lastPerf(e.name);
   const sg = suggestion(e);
   const allDone = e.sets.length && e.sets.every(s => s.done);
   return `<section class="card outlined ex-card ${allDone ? 'is-done' : ''}" id="ex-${i}">
     <div class="ex-head">
-      <div class="ex-idx">${allDone ? '<span class="msr">check</span>' : i + 1}</div>
+      ${e.img ? thumbBtn(e, 'ex-thumb', allDone ? '<span class="msr">check</span>' : i + 1) : `<div class="ex-idx">${allDone ? '<span class="msr">check</span>' : i + 1}</div>`}
       <div class="grow"><h3 class="title-m">${esc(e.name)}</h3>
         <div class="body-s muted">${e.sets.length} × ${esc(e.reps)} reps · descanso ${restLabel(e.rest)}</div></div>
     </div>
@@ -330,7 +461,7 @@ function startWorkout(id) {
     exercises: r.exercises.map(e => {
       const sg = suggestion(e);
       return {
-        name: e.name, reps: e.reps, rest: +e.rest || 90, notes: e.notes || '',
+        name: e.name, reps: e.reps, rest: +e.rest || 90, notes: e.notes || '', img: e.img || '',
         sets: Array.from({ length: Math.max(1, +e.sets || 1) }, () => ({ w: sg ? String(sg.w) : '', r: '', done: false })),
       };
     }),
@@ -510,6 +641,12 @@ function renderEditor() {
           <div class="field"><label>Descanso</label><select data-ed="ex" data-i="${i}" data-f="rest">${restOpts(e.rest)}</select></div>
         </div>
         <div class="field"><label>Notas (opcional)</label><input data-ed="ex" data-i="${i}" data-f="notes" value="${esc(e.notes)}" placeholder="Técnica, tempo, RIR…" autocomplete="off"></div>
+        <div class="ed-img">
+          ${e.img ? `<img src="${imgUrl(e.img)}" alt="" loading="lazy">` : '<span class="ed-img-empty"><span class="msr">image</span></span>'}
+          <div class="grow body-s muted">${e.img ? 'Imagen de referencia' : 'Sin imagen de referencia'}</div>
+          <button class="btn text sm" data-action="ed-img" data-i="${i}"><span class="msr">${e.img ? 'swap_horiz' : 'add_photo_alternate'}</span>${e.img ? 'Cambiar' : 'Elegir'}</button>
+          ${e.img ? `<button class="icon-btn" data-action="ed-img-clear" data-i="${i}" aria-label="Quitar imagen"><span class="msr">hide_image</span></button>` : ''}
+        </div>
         <div class="ed-ex-actions">
           <button class="icon-btn" data-action="ed-up" data-i="${i}" ${i === 0 ? 'disabled' : ''} aria-label="Subir"><span class="msr">arrow_upward</span></button>
           <button class="icon-btn" data-action="ed-down" data-i="${i}" ${i === draft.exercises.length - 1 ? 'disabled' : ''} aria-label="Bajar"><span class="msr">arrow_downward</span></button>
@@ -528,7 +665,7 @@ async function saveEditor() {
   const name = draft.name.trim();
   if (!name) { snack('Ponle un nombre a la rutina'); $('#ed-name').focus(); return; }
   const exercises = draft.exercises
-    .map(e => ({ ...e, name: e.name.trim(), sets: Math.min(10, Math.max(1, parseInt(e.sets, 10) || 3)), reps: String(e.reps).trim() || '8-12', rest: +e.rest || 90 }))
+    .map(e => ({ ...e, img: e.img || IMG_BY_NAME[e.name.trim()] || '', name: e.name.trim(), sets: Math.min(10, Math.max(1, parseInt(e.sets, 10) || 3)), reps: String(e.reps).trim() || '8-12', rest: +e.rest || 90 }))
     .filter(e => e.name);
   if (!exercises.length) { snack('Agrega al menos un ejercicio'); return; }
   const r = { id: draft.id, name, day: draft.day, exercises };
@@ -805,6 +942,19 @@ document.addEventListener('click', async ev => {
       const c = JSON.parse(JSON.stringify(r)); c.id = uid(); c.name = r.name + ' (copia)'; c.day = null; c.exercises.forEach(e => { e.id = uid(); });
       S.routines.push(c); save(); render(); snack('Rutina duplicada'); break;
     }
+    case 'show-img': showImage(d.img, d.name); break;
+    case 'ed-img': openPicker(+d.i); break;
+    case 'ed-img-clear': draft.exercises[+d.i].img = ''; renderEditor(); break;
+    case 'pick-close': $('#picker').close(); break;
+    case 'pick-img':
+      if (draft && pickFor !== null) {
+        const ex = draft.exercises[pickFor];
+        ex.img = d.id;
+        if (!ex.name.trim()) { const it = exIndex && exIndex.find(x => x[0] === d.id); if (it) ex.name = it[1]; }
+        renderEditor();
+      }
+      $('#picker').close();
+      break;
     case 'ed-close': $('#editor').close(); draft = null; break;
     case 'ed-save': saveEditor(); break;
     case 'ed-add': draft.exercises.push(E('', 3, '10-12', 90)); renderEditor(); { const ins = $$('#editor [data-f="name"]'); ins.at(-1).focus(); } break;
@@ -854,6 +1004,7 @@ document.addEventListener('click', async ev => {
 
 document.addEventListener('input', ev => {
   const t = ev.target;
+  if (t.id === 'pick-q') { renderPicker(); return; }
   if (t.dataset.set && S.active) {
     const s = S.active.exercises[+t.dataset.e].sets[+t.dataset.s];
     s[t.dataset.set] = t.value.replace(/[^\d.,]/g, '');
@@ -892,8 +1043,7 @@ $('#import-file').addEventListener('change', async ev => {
     const data = JSON.parse(await f.text());
     if (!data || !Array.isArray(data.routines) || !Array.isArray(data.sessions)) throw new Error('formato');
     if (await modal({ title: '¿Importar respaldo?', body: `Contiene ${data.routines.length} rutinas y ${data.sessions.length} sesiones. Reemplazará los datos actuales.`, ok: 'Importar', cancel: 'Cancelar' })) {
-      const fr = freshState();
-      S = { ...fr, ...data, profile: { ...fr.profile, ...data.profile } };
+      S = migrate(data);
       save(); applyTheme(); render(); snack('Respaldo importado');
     }
   } catch (_) { snack('El archivo no es un respaldo válido de GymTrack'); }
