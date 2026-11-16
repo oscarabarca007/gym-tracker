@@ -1,5 +1,5 @@
 /* Service worker: permite usar GymTrack sin conexión en el gym. */
-const CACHE = 'gymtrack-v2';
+const CACHE = 'gymtrack-v3';
 const ASSETS = ['./', './index.html', './styles.css', './app.js', './manifest.webmanifest', './icon.svg'];
 
 self.addEventListener('install', e => {
@@ -21,7 +21,7 @@ self.addEventListener('fetch', e => {
   if (url.origin === location.origin) {
     // Imágenes: caché primero (no cambian). Resto: red primero para recibir actualizaciones.
     if (url.pathname.includes('/img/')) { e.respondWith(cacheFirst(req)); return; }
-    e.respondWith(fetch(req).then(res => { const copy = res.clone(); caches.open(CACHE).then(c => c.put(req, copy)); return res; })
+    e.respondWith(fetch(req.url, { cache: 'no-cache' }).then(res => { const copy = res.clone(); caches.open(CACHE).then(c => c.put(req, copy)); return res; })
       .catch(() => caches.match(req, { ignoreSearch: true }).then(r => r || caches.match('./index.html'))));
   } else if (/(^|\.)googleapis\.com$|(^|\.)gstatic\.com$|^raw\.githubusercontent\.com$/.test(url.hostname)) {
     e.respondWith(cacheFirst(req));
